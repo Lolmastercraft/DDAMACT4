@@ -6,12 +6,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,7 +51,7 @@ fun NoteCard(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Header con título y estado
+            // Header con título, botón de completar y estado
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -57,7 +61,8 @@ fun NoteCard(
                     text = note.title,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 18.sp
+                        fontSize = 18.sp,
+                        textDecoration = if (note.isCompleted) TextDecoration.LineThrough else TextDecoration.None
                     ),
                     color = if (note.isCompleted)
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -68,14 +73,36 @@ fun NoteCard(
                     modifier = Modifier.weight(1f)
                 )
 
-                // Indicador sutil de completado
-                if (note.isCompleted) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(androidx.compose.foundation.shape.CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
-                    )
+                // CheckCircle + Círculo vacío
+                IconButton(
+                    onClick = {
+                        onToggleComplete(note.copy(isCompleted = !note.isCompleted))
+                    },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    if (note.isCompleted) {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = "Marcar como incompleta",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    } else {
+                        // Círculo vacío usando Box
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                    shape = CircleShape
+                                )
+                                .padding(2.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = CircleShape
+                                )
+                        )
+                    }
                 }
             }
 
@@ -85,7 +112,8 @@ fun NoteCard(
                     text = note.content,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = 14.sp,
-                        lineHeight = 20.sp
+                        lineHeight = 20.sp,
+                        textDecoration = if (note.isCompleted) TextDecoration.LineThrough else TextDecoration.None
                     ),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     maxLines = 3,

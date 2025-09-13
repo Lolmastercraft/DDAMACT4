@@ -74,8 +74,11 @@ fun NoteListScreen(
                     )
 
                     if (notes.isNotEmpty()) {
+                        val completedCount = notes.count { it.isCompleted }
+                        val totalCount = notes.size
                         Text(
-                            text = "${notes.size} ${if (notes.size == 1) "nota" else "notas"}",
+                            text = "$totalCount ${if (totalCount == 1) "nota" else "notas"}" +
+                                    if (completedCount > 0) " • $completedCount completadas" else "",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                             modifier = Modifier.padding(top = 4.dp)
@@ -182,6 +185,9 @@ fun NoteListScreen(
                             onDelete = { deletedNoteParam ->
                                 viewModel.deleteNote(deletedNoteParam)
                                 deletedNote = deletedNoteParam
+                            },
+                            onToggleComplete = { updatedNote ->
+                                viewModel.updateNote(updatedNote)
                             }
                         )
                     }
@@ -200,6 +206,9 @@ fun NoteListScreen(
                             onDelete = { deletedNoteParam ->
                                 viewModel.deleteNote(deletedNoteParam)
                                 deletedNote = deletedNoteParam
+                            },
+                            onToggleComplete = { updatedNote ->
+                                viewModel.updateNote(updatedNote)
                             }
                         )
                     }
@@ -213,7 +222,8 @@ fun NoteListScreen(
 private fun NoteItemWithAnimations(
     note: Note,
     onNoteClick: (Note) -> Unit,
-    onDelete: (Note) -> Unit
+    onDelete: (Note) -> Unit,
+    onToggleComplete: (Note) -> Unit
 ) {
     var visible by remember { mutableStateOf(true) }
 
@@ -268,7 +278,8 @@ private fun NoteItemWithAnimations(
             content = {
                 NoteCard(
                     note = note,
-                    onclick = { onNoteClick(note) }
+                    onclick = { onNoteClick(note) },
+                    onToggleComplete = onToggleComplete
                 )
             }
         )
