@@ -2,12 +2,15 @@ package com.example.pruebas2.ui.screens
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -15,8 +18,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.pruebas2.data.Note
 import com.example.pruebas2.ui.components.NoteCard
 import com.example.pruebas2.viewModel.NoteViewModel
@@ -32,12 +38,10 @@ fun NoteListScreen(
     val snackBarHostState = remember { SnackbarHostState() }
     var deletedNote by remember { mutableStateOf<Note?>(null) }
 
-    // Configuración responsive
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val isTablet = screenWidth > 600.dp
 
-    // Feedback de eliminación con Snackbar
     deletedNote?.let { note ->
         LaunchedEffect(note) {
             val result = snackBarHostState.showSnackbar(
@@ -54,23 +58,68 @@ fun NoteListScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text("Mis Notas (${notes.size})")
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "Notas",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 28.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    if (notes.isNotEmpty()) {
+                        Text(
+                            text = "${notes.size} ${if (notes.size == 1) "nota" else "notas"}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+            }
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackBarHostState,
+                snackbar = { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        shape = RoundedCornerShape(12.dp),
+                        containerColor = MaterialTheme.colorScheme.inverseSurface,
+                        contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                        actionColor = MaterialTheme.colorScheme.primary
+                    )
                 }
             )
         },
-        snackbarHost = { SnackbarHost(snackBarHostState) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            FloatingActionButton(
                 onClick = onAddNoteClick,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text(if (isTablet) "Agregar nueva nota" else "Agregar") }
-            )
-        }
+                modifier = Modifier.size(56.dp),
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                elevation = FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 4.dp,
+                    pressedElevation = 8.dp
+                )
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Agregar nota",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         if (notes.isEmpty()) {
-            // Estado vacío
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -81,28 +130,50 @@ fun NoteListScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = "No se han agregado notas aún",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = onAddNoteClick) {
-                        Text("Crear primera nota")
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                        )
                     }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Text(
+                        text = "Aún no tienes notas",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Toca + para crear tu primera nota",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
                 }
             }
         } else {
-            // Lista responsive de notas
             if (isTablet) {
-                // Grid para tablets
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 300.dp),
+                    columns = GridCells.Adaptive(minSize = 320.dp),
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding),
-                    contentPadding = PaddingValues(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    contentPadding = PaddingValues(bottom = 80.dp),
+                    horizontalArrangement = Arrangement.spacedBy(0.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     items(notes, key = { it.id }) { note ->
                         NoteItemWithAnimations(
@@ -116,12 +187,11 @@ fun NoteListScreen(
                     }
                 }
             } else {
-                // Lista vertical para móviles
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding),
-                    contentPadding = PaddingValues(horizontal = 8.dp)
+                    contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
                     items(notes, key = { it.id }) { note ->
                         NoteItemWithAnimations(
@@ -149,14 +219,19 @@ private fun NoteItemWithAnimations(
 
     AnimatedVisibility(
         visible = visible,
-        enter = slideInHorizontally(
-            initialOffsetX = { -it },
-            animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)
-        ) + fadeIn(animationSpec = tween(300)),
-        exit = slideOutHorizontally(
-            targetOffsetX = { it },
-            animationSpec = tween(300)
-        ) + fadeOut(animationSpec = tween(300))
+        enter = fadeIn(animationSpec = tween(300)) +
+                slideInVertically(
+                    initialOffsetY = { it / 3 },
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                ),
+        exit = fadeOut(animationSpec = tween(200)) +
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300)
+                )
     ) {
         val dismissState = rememberSwipeToDismissBoxState(
             confirmValueChange = { dismissValue ->
@@ -177,13 +252,16 @@ private fun NoteItemWithAnimations(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 8.dp),
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.8f)),
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Eliminar",
-                        tint = MaterialTheme.colorScheme.error
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(end = 20.dp)
                     )
                 }
             },
