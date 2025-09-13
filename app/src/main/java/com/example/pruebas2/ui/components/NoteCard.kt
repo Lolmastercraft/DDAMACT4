@@ -93,14 +93,6 @@ fun NoteCard(
                 )
             }
 
-            // Galería de imágenes minimalista (usando función del ZoomableImage.kt)
-            if (note.images.isNotEmpty()) {
-                ImageGalleryMinimal(
-                    images = note.images,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
             // Footer con fecha
             Text(
                 text = note.date.format(DateTimeFormatter.ofPattern("dd MMM, HH:mm")),

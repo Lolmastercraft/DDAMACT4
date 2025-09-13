@@ -23,7 +23,10 @@ class MainActivity : ComponentActivity() {
             NoteDataBase::class.java,
             "note_db"
         )
-            .addMigrations(NoteDataBase.MIGRATION_1_2) // Agregar migración
+            .addMigrations(
+                NoteDataBase.MIGRATION_1_2,
+                NoteDataBase.MIGRATION_2_3
+            )
             .build()
 
         val repository = NoteRepository(database.noteDao())

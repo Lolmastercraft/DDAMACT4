@@ -107,7 +107,6 @@ fun AddEditNoteScreen(
                             title = title.trim(),
                             content = content.trim(),
                             date = LocalDateTime.now(),
-                            images = existingNote?.images ?: emptyList(),
                             isCompleted = existingNote?.isCompleted ?: false
                         )
                         if (existingNote == null) {
