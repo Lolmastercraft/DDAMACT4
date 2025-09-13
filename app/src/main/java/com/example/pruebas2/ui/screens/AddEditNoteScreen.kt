@@ -58,7 +58,9 @@ fun AddEditNoteScreen(
                             id = existingNote?.id ?: 0,
                             title = title,
                             content = content,
-                            date = LocalDateTime.now()
+                            date = LocalDateTime.now(),
+                            images = existingNote?.images ?: emptyList(), // Mantener imágenes existentes
+                            isCompleted = existingNote?.isCompleted ?: false // Mantener estado existente
                         )
                         if (existingNote == null) {
                             viewModel.addNote(note)
